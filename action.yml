@@ -17,17 +17,57 @@ inputs:
     description: Version of vbuild to use
     required: false
     default: latest
+  driver:
+    description: Which driver to use. Can be podman or docker
+    required: false
+    default: podman
 runs:
   using: composite
   steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        set -e
+        if [ "$driver" != 'podman' ] && [ "$driver" != 'docker' ];then
+          echo "Error: invalid driver: $driver"
+          exit 1
+        fi
+        if [ ! -d "$src_path" ];then
+          echo "Error: Path does not exist: $src_path"
+          exit 1
+        fi
+      env:
+        driver: ${{ inputs.driver }}
+        src_path: ${{ inputs.path }}
     - name: Download vbuild
       shell: bash
       run: |
         set -e
         curl \
-          'https://github.com/Eeems/vbuild/releases/download/${{ inputs.version }}/vbuild-vbuild-ubuntu' \
-          --output=/usr/local/bin/vbuild
+          --location \
+          'https://github.com/Eeems/vbuild/releases/${{ inputs.version }}/download/vbuild-vbuild-ubuntu' \
+          --output /usr/local/bin/vbuild
         chmod +x /usr/local/bin/vbuild
+        file /usr/local/bin/vbuild
     - name: Run vbuild
       shell: bash
-      run: vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || "all" }}"
+      run: |
+        set -e
+        if [ "$driver" == 'podman' ];then
+          echo "Starting podman service..."
+          mkdir -p /run/user/"$UID"/podman
+          podman system service --time 0 unix:///run/user/"$UID"/podman/podman.sock &
+          tries=0
+          while [ ! -S /run/podman/podman.sock ] && [ $tries -lt 60 ];do
+            tries=$(( tries + 1 ))
+            sleep 0.1
+          done
+        fi
+        echo "Running vbuild..."
+        vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || 'all' }}"
+        if [ "$driver" == 'podman' ];then
+          echo "Stopping podman service..."
+          kill $(jobs -p) || true
+        fi
+      env:
+        driver: ${{ inputs.driver }}
