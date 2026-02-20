@@ -1,0 +1,33 @@
+name: "VBuild"
+description: Build a vellum package
+author: Eeems
+branding:
+  icon: tablet
+  color: white
+inputs:
+  path:
+    description: Folder containing the VELBUILD file and any artifacts
+    required: false
+    default: .
+  action:
+    description: Action to run
+    required: false
+    default: all
+  version:
+    description: Version of vbuild to use
+    required: false
+    default: latest
+runs:
+  using: composite
+  steps:
+    - name: Download vbuild
+      shell: bash
+      run: |
+        set -e
+        curl \
+          'https://github.com/Eeems/vbuild/releases/download/${{ inputs.version }}/vbuild-vbuild-ubuntu' \
+          --output=/usr/local/bin/vbuild
+        chmod +x /usr/local/bin/vbuild
+    - name: Run vbuild
+      shell: bash
+      run: vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || "all" }}"

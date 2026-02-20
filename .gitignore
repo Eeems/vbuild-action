@@ -1,0 +1,8 @@
+tests/**/APKBUILD
+tests/**/*.pre-install
+tests/**/*.post-install
+tests/**/*.pre-upgrade
+tests/**/*.post-upgrade
+tests/**/*.pre-deinstall
+tests/**/*.post-deinstall
+tests/**/*.post-os-upgrade

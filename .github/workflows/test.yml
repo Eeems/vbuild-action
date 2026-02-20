@@ -1,0 +1,27 @@
+name: build
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  test-basic:
+    name: Test basic
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - tests/basic
+    steps:
+      - name: Checkout the Git repository
+        uses: actions/checkout@v4
+      - name: Run action
+        uses: ./
+        with:
+          path: ${{ matrix.path }}
+      - name: Validate output
+        shell: bash
+        run: ${{ matrix.path }}/validate.sh
