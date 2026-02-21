@@ -43,12 +43,19 @@ runs:
       shell: bash
       run: |
         set -e
+        if [[ "$version" == "latest" ]];then
+          part="$version/download"
+        else
+          part="download/$version"
+        fi
         curl \
           --location \
-          'https://github.com/Eeems/vbuild/releases/${{ inputs.version }}/download/vbuild-vbuild-ubuntu' \
+          "https://github.com/Eeems/vbuild/releases/$part/vbuild-vbuild-ubuntu" \
           --output /usr/local/bin/vbuild
         chmod +x /usr/local/bin/vbuild
         file /usr/local/bin/vbuild
+      env:
+        version: ${{ inputs.version }}
     - name: Run vbuild
       shell: bash
       run: |
