@@ -56,3 +56,20 @@ jobs:
         run: |
           set -e
           tests/${{ matrix.path }}/validate.sh
+  test-version:
+    name: Test version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Git repository
+        uses: actions/checkout@v4
+      - name: Run action
+        uses: ./
+        with:
+          path: tests/basic
+          version: 0.0.7
+      - name: Validate output
+        if: "!cancelled()"
+        shell: bash
+        run: |
+          set -e
+          tests/basic/validate.sh
