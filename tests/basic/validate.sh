@@ -3,6 +3,7 @@ set -e
 cd "$(dirname "$0")"
 source ../lib.sh
 ls -l
+ls -l dist/
 exists APKBUILD
 exists entware-rc.post-install
 exists entware-rc.post-os-upgrade
