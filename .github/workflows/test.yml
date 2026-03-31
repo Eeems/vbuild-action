@@ -45,17 +45,32 @@ jobs:
     steps:
       - name: Checkout the Git repository
         uses: actions/checkout@v4
+      - name: get arch
+        id: arch
+        run: |
+          set -e
+          echo -n "arch=" >>$GITHUB_OUTPUT
+          if [ ! -f "$arch_file" ];then
+            echo "noarch" >>$GITHUB_OUTPUT
+          else
+            cat "$arch_file" | head -zn1 >>$GITHUB_OUTPUT
+          fi
+        env:
+          arch_file: tests/${{ matrix.path }}/arch
       - name: Run action
         uses: ./
         with:
           path: tests/${{ matrix.path }}
           driver: ${{ matrix.driver }}
+          arch: ${{ steps.arch.outputs.arch }}
       - name: Validate output
         if: "!cancelled()"
         shell: bash
         run: |
           set -e
-          tests/${{ matrix.path }}/validate.sh
+          "$script"
+        env:
+          script: tests/${{ matrix.path }}/validate.sh
   test-version:
     name: Test version
     runs-on: ubuntu-latest

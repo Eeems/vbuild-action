@@ -6,6 +6,7 @@ Usage
   uses: Eeems/vbuild-action@v1
   with:
     path: ./package/
+    arch: noarch
 
 - name: Upload package(s)
   uses: actions/upload-artifact@v4

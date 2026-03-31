@@ -17,6 +17,10 @@ inputs:
     description: Version of vbuild to use
     required: false
     default: latest
+  arch:
+    description: What architecture to build for
+    required: false
+    default: noarch
   driver:
     description: Which driver to use. Can be podman or docker
     required: false
@@ -28,8 +32,8 @@ runs:
       shell: bash
       run: |
         set -e
-        if [ "$driver" != 'podman' ] && [ "$driver" != 'docker' ];then
-          echo "Error: invalid driver: $driver"
+        if [ "$VBUILD_DRIVER" != 'podman' ] && [ "$VBUILD_DRIVER" != 'docker' ];then
+          echo "Error: invalid driver: $VBUILD_DRIVER"
           exit 1
         fi
         if [ ! -d "$src_path" ];then
@@ -37,7 +41,7 @@ runs:
           exit 1
         fi
       env:
-        driver: ${{ inputs.driver }}
+        VBUILD_DRIVER: ${{ inputs.driver }}
         src_path: ${{ inputs.path }}
     - name: Download vbuild
       shell: bash
@@ -60,7 +64,7 @@ runs:
       shell: bash
       run: |
         set -e
-        if [ "$driver" == 'podman' ];then
+        if [ "$VBUILD_DRIVER" == 'podman' ];then
           echo "Starting podman service..."
           mkdir -p /run/user/"$UID"/podman
           podman system service --time 0 unix:///run/user/"$UID"/podman/podman.sock &
@@ -72,9 +76,10 @@ runs:
         fi
         echo "Running vbuild..."
         vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || 'all' }}"
-        if [ "$driver" == 'podman' ];then
+        if [ "$VBUILD_DRIVER" == 'podman' ];then
           echo "Stopping podman service..."
           kill $(jobs -p) || true
         fi
       env:
-        driver: ${{ inputs.driver }}
+        VBUILD_DRIVER: ${{ inputs.driver }}
+        CARCH: ${{ inputs.arch }}
