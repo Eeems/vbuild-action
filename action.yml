@@ -52,9 +52,14 @@ runs:
         else
           part="download/$version"
         fi
+        if printf '%s\n' "${{ inputs.version }}" "0.0.22" | sort -C -V; then
+          name=vbuild-vbuild-ubuntu
+        else
+          name=vbuild-x86_64-glibc
+        fi
         curl \
           --location \
-          "https://github.com/Eeems/vbuild/releases/$part/vbuild-vbuild-ubuntu" \
+          "https://github.com/Eeems/vbuild/releases/$part/$name" \
           --output /usr/local/bin/vbuild
         chmod +x /usr/local/bin/vbuild
         file /usr/local/bin/vbuild
