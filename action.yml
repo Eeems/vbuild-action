@@ -49,13 +49,14 @@ runs:
         set -e
         if [[ "$version" == "latest" ]];then
           part="$version/download"
+          name=vbuild-x86_64-glibc
         else
           part="download/$version"
-        fi
-        if printf '%s\n' "${{ inputs.version }}" "0.0.22" | sort -C -V; then
-          name=vbuild-vbuild-ubuntu
-        else
-          name=vbuild-x86_64-glibc
+          if printf '%s\n' "${{ inputs.version }}" "0.0.22" | sort -C -V; then
+            name=vbuild-vbuild-ubuntu
+          else
+            name=vbuild-x86_64-glibc
+          fi
         fi
         curl \
           --location \

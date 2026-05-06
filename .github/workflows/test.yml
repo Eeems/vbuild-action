@@ -15,7 +15,7 @@ jobs:
       paths: ${{ steps.paths.outputs.JSON_CONTENT }}
     steps:
       - name: Checkout the Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Output matrix
         id: paths
         run: |
@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout the Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: get arch
         id: arch
         run: |
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run action
         uses: ./
         with:
