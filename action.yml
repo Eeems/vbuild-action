@@ -44,30 +44,8 @@ runs:
         VBUILD_DRIVER: ${{ inputs.driver }}
         src_path: ${{ inputs.path }}
     - name: Download vbuild
-      shell: bash
-      run: |
-        set -e
-        if [[ "$version" == "latest" ]];then
-          part="$version/download"
-          name=vbuild-x86_64-glibc
-        else
-          part="download/$version"
-          if printf '%s\n' "${{ inputs.version }}" "0.0.22" | sort -C -V; then
-            name=vbuild-vbuild-ubuntu
-          else
-            name=vbuild-x86_64-glibc
-          fi
-        fi
-        curl \
-          --location \
-          "https://github.com/Eeems/vbuild/releases/$part/$name" \
-          --output /usr/local/bin/vbuild
-        chmod +x /usr/local/bin/vbuild
-        if [[ "$(file /usr/local/bin/vbuild)" == *"ASCII text"* ]];then
-          cat /usr/local/bin/vbuild
-          exit 1
-        fi
-      env:
+      uses: ./install
+      with:
         version: ${{ inputs.version }}
     - name: Run vbuild
       shell: bash
