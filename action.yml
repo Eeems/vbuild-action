@@ -83,7 +83,7 @@ runs:
           mkdir -p $HOME/.config/vbuild
           cd $HOME/.config/vbuild
           echo "$privkey" > "$privkeyname".rsa
-          openssl rsa -in "$privkeyname".psa -pubout -out "$privkeyname".pub
+          openssl rsa -in "$privkeyname".rsa -pubout -out "$privkeyname".pub
           chmod 600 "$privkeyname".rsa
         fi
       env:
