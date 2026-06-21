@@ -88,3 +88,28 @@ jobs:
         run: |
           set -e
           tests/basic/validate.sh
+  test-privkey:
+    name: Test privkey
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Git repository
+        uses: actions/checkout@v6
+      - name: Generate privkey
+        id: privkey
+        run: |
+          set -e
+          echo "privkey<<EOF" >> $GITHUB_OUTPUT
+          openssl genrsa >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Run action
+        uses: ./
+        with:
+          path: tests/basic
+          privkey: ${{ steps.privkey.output.privkey }}
+          privkeyname: test
+      - name: Validate output
+        if: "!cancelled()"
+        shell: bash
+        run: |
+          set -e
+          tests/basic/validate.sh
