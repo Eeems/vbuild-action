@@ -88,3 +88,39 @@ jobs:
         run: |
           set -e
           tests/basic/validate.sh
+  test-privkey:
+    name: Test privkey
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Git repository
+        uses: actions/checkout@v6
+      - name: Generate privkey
+        id: privkey
+        run: |
+          set -e
+          echo "privkey<<EOF" >> $GITHUB_OUTPUT
+          openssl genrsa >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Run action
+        uses: ./
+        with:
+          path: tests/basic
+          privkey: ${{ steps.privkey.output.privkey }}
+          privkeyname: test
+      - name: Validate output
+        if: "!cancelled()"
+        shell: bash
+        run: |
+          set -e
+          tests/basic/validate.sh
+      - name: Validate keys
+        if: "!cancelled()"
+        shell: bash
+        run: |
+          set -e
+          docker run \
+            --rm \
+            --volume=$(pwd)/tests/basic/dist/noarch/entware-rc-0.1-r0.apk:/entware-rc-0.1-r0.apk \
+            --volume=$HOME/.config/vbuild/test.rsa.pub:/etc/apk/keys/test.rsa.pub \
+            ghcr.io/eeems/vbuild-builder:main \
+            apk verify /entware-rc-0.1-r0.apk

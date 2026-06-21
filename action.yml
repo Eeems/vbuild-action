@@ -25,6 +25,12 @@ inputs:
     description: Which driver to use. Can be podman or docker
     required: false
     default: podman
+  privkey:
+    description: Private key to use
+    required: false
+  privkeyname:
+    description: Name of the private key
+    default: vbuild
 runs:
   using: composite
   steps:
@@ -69,6 +75,20 @@ runs:
         fi
       env:
         version: ${{ inputs.version }}
+    - name: Setup keys
+      shell: bash
+      run: |
+        set -e
+        if [[ "$privkey" != "" ]];then
+          mkdir -p $HOME/.config/vbuild
+          cd $HOME/.config/vbuild
+          echo "$privkey" > "$privkeyname".rsa
+          openssl rsa -in "$privkeyname".psa -pubout -out "$privkeyname".pub
+          chmod 600 "$privkeyname".rsa
+        fi
+      env:
+        privkey: ${{ inputs.privkey }}
+        privkeyname: ${{ inputs.privkeyname }}
     - name: Run vbuild
       shell: bash
       run: |
@@ -86,7 +106,8 @@ runs:
           done
         fi
         echo "Running vbuild..."
-        vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || 'all' }}"
+        VBUILD_KEY_NAME=${privkeyname:-vbuild} \
+          vbuild -C "${{ inputs.path || '.' }}" "${{ inputs.action || 'all' }}"
         if [ "$VBUILD_DRIVER" == 'podman' ];then
           echo "Stopping podman service..."
           kill $(jobs -p) || true
@@ -94,3 +115,4 @@ runs:
       env:
         VBUILD_DRIVER: ${{ inputs.driver }}
         CARCH: ${{ inputs.arch }}
+        privkeyname: ${{ inputs.privkeyname }}
